@@ -106,7 +106,7 @@ class CustomersContoller extends Controller
         $rules = $country->validRegx();
         $filterd_users = array();
         $country_codes = CountryCode::all();
-        if ($country_filter || $state_filter) {
+        if ( $state_filter) {
             foreach($users as $user) 
             {
                 foreach($rules as $rule)
