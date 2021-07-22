@@ -17,6 +17,15 @@ class CustomersContoller extends Controller
         
     }
 
+    public function determineState($user , $rule, $state)
+    {       
+        $country_code = $country->getCountryCode($rule['phone']);
+        $user->state = $state;
+        $user->country_name = $rule['title'];
+        $user->country_code = '+' . $country_code;
+               
+        return $user;
+    }
     public function getAll(Request $request)
     {
         $all_data = array();
@@ -31,23 +40,18 @@ class CustomersContoller extends Controller
             {
                 $value = preg_match_all($rule['phone'], $user->phone, $matches, PREG_OFFSET_CAPTURE);
                 if (!$value) {
-                    $cc = substr($user->phone, 1,3);
-                    if($cc == $country->getCountryCode($rule['phone']))
+                    $country_code = substr($user->phone, 1,3);
+                    if($country_code == $country->getCountryCode($rule['phone']))
                     {
-                        $country_code = $country->getCountryCode($rule['phone']);
-                        $user->state = "NOK";
-                        $user->country_name = $rule['title'];
-                        $user->country_code = '+' . $country_code;
+                       $user = $this->determineState($user ,$rule['phone'], "NOK");
                     }
                     continue;
                 }else {
-                    $country_code = $country->getCountryCode($rule['phone']);
-                    $user->state = "OK";
-                    $user->country_name = $rule['title'];
-                    $user->country_code = '+' . $country_code;
+                    $user = $this->determineState($user ,$rule['phone'], "OK");
                 }
             }
         }
+
         $all_data['users'] = $users;
         $all_data['country_codes'] = $country_codes;
         return response()->json($all_data);
@@ -70,21 +74,15 @@ class CustomersContoller extends Controller
                     {
                         $value = preg_match_all($rule['phone'], $user->phone, $matches , PREG_OFFSET_CAPTURE);
                         if (!$value) {
-                            $cc = substr($user->phone, 1,3);
-                            if($cc == $country->getCountryCode($rule['phone']))
+                            $country_code = substr($user->phone, 1,3);
+                            if($country_code == $country->getCountryCode($rule['phone']))
                             {
-                                $country_code = $country->getCountryCode($rule['phone']);
-                                $user->state = "NOK";
-                                $user->country_name = $rule['title'];
-                                $user->country_code = '+' . $country_code;
+                                $user = $this->determineState($user ,$rule['phone'], "NOK");
                                 array_push($filterd_users, $user);
                             }
                             continue;
                         } else {
-                            $country_code = $country->getCountryCode($rule['phone']);
-                            $user->state = "OK";
-                            $user->country_name = $rule['title'];
-                            $user->country_code = '+' . $country_code;
+                            $user = $this->determineState($user ,$rule['phone'], "NOK");
                             if ( $user->country_name == $country_filter )
                                 array_push($filterd_users, $user);
                         }
@@ -115,22 +113,18 @@ class CustomersContoller extends Controller
                         if (!$value) {
                             continue;
                         } else {
-                            $country_code = $country->getCountryCode($rule['phone']);
-                            $user->state = "OK";
-                            $user->country_name = $rule['title'];
-                            $user->country_code = '+' . $country_code;
+                            $user = $this->determineState($user ,$rule['phone'], "NOK");
+
                             array_push($filterd_users, $user);
                         }
                     } else if ($state_filter == "NOK") {
                         $value = preg_match_all($rule['phone'], $user->phone, $matches , PREG_OFFSET_CAPTURE);
                         if (!$value) {
-                            $cc = substr($user->phone, 1,3);
-                            if($cc == $country->getCountryCode($rule['phone']))
+                            $country_code = substr($user->phone, 1,3);
+                            if($country_code == $country->getCountryCode($rule['phone']))
                             {
-                                $country_code = $country->getCountryCode($rule['phone']);
-                                $user->state = "NOK";
-                                $user->country_name = $rule['title'];
-                                $user->country_code = '+' . $country_code;
+                                $user = $this->determineState($user ,$rule['phone'], "NOK");
+
                                 array_push($filterd_users, $user);
                             }
                             continue;
@@ -160,10 +154,7 @@ class CustomersContoller extends Controller
                         if (!$value) {
                             continue;
                         } else {
-                            $country_code = $country->getCountryCode($rule['phone']);
-                            $user->state = "OK";
-                            $user->country_name = $rule['title'];
-                            $user->country_code = '+' . $country_code;
+                            $user = $this->determineState($user ,$rule['phone'], "NOK");
                             if ( $user->country_name == $country_filter )
                                 array_push($filterd_users, $user);
                         }
@@ -173,10 +164,7 @@ class CustomersContoller extends Controller
                             $cc = substr($user->phone, 1,3);
                             if($cc == $country->getCountryCode($rule['phone']))
                             {
-                                $country_code = $country->getCountryCode($rule['phone']);
-                                $user->state = "NOK";
-                                $user->country_name = $rule['title'];
-                                $user->country_code = '+' . $country_code;
+                                $user = $this->determineState($user ,$rule['phone'], "NOK");
                                 array_push($filterd_users, $user);
                             }
                             continue;
