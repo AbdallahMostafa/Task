@@ -56,7 +56,6 @@ class CustomersContoller extends Controller
 
     public function getFilteredCountries($country_filter)
     {
-        Log::info("hello");
         $users = Customer::all();
         $country = new Country();
         $rules = $country->validRegx();
