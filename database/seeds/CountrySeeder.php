@@ -38,11 +38,6 @@ class CountrySeeder extends Seeder
         ]);
     }
 
-    // private function findCountry($title){
-    //     $num_servers = \App\CountryCode::where('table_name', 'country_codes')
-    //             ->where('country_name', $title);
-    // }
-
     private function addCountryCode($country_data)
     {
         $country_code = new CountryCode();
