@@ -1,3 +1,6 @@
 [submodule "Task_angular"]
 	path = Task_angular
 	url = https://github.com/AbdallahMostafa/Task_angular
+[submodule "resources/Task_angular"]
+	path = resources/Task_angular
+	url = https://github.com/AbdallahMostafa/Task_angular
