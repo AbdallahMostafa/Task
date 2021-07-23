@@ -17,4 +17,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Route::any('/{any}', [AngularController::class, 'index'])->where('any', '^(?!any).*$');
+Route::get("/all", "CustomersContoller@getUsersData");
+Route::get("/country_codes", "CustomersContoller@getCountryCodes");
