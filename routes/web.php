@@ -15,10 +15,3 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Route::get("all", "CustomersContoller@list");
-// Route::get("/all", "CustomersContoller@getCountryCodes");
-Route::get("/all", "CustomersContoller@getAll");
-Route::get("/country_filter/{country_filter}", "CustomersContoller@getFilteredCountries");
-Route::get("/state_filter/{state_filter}", "CustomersContoller@getSateFilter");
-Route::get("/country_state_filter/{country_filter}/{state_filter}", "CustomersContoller@getStateCountryFilter");
-
