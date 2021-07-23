@@ -2,11 +2,8 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Country extends Model 
+class Country 
 {
-
     public function customer()
     {
         return $this->belongsTo(Customer::class);
@@ -42,7 +39,5 @@ class Country extends Model
         $country_code = substr($phone_number, 3,3);
         return $country_code;
     }
-
-    protected $table = 'country';
 
 }
