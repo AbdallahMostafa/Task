@@ -11,170 +11,73 @@ use App\CountryCode;
 use View;
 
 class CustomersContoller extends Controller
-{
-
+{   
+    private $country;
     public function __construct() {
-        
+        $this->country = new Country();
     }
 
-    public function determineState($user , $rule, $state)
-    {       
-        $country_code = $country->getCountryCode($rule['phone']);
+    private function setCountryDetails($user , $rule, $state)
+    {   
+        $country_code = $this->country->getCountryCode($rule['phone']);
         $user->state = $state;
         $user->country_name = $rule['title'];
         $user->country_code = '+' . $country_code;
-               
+
         return $user;
     }
-    public function getAll(Request $request)
+
+    private function filterByState($users, $state_filter)
+    {
+        $filterd_users = array();
+
+        foreach($users as $index => $user) 
+        {
+            if($state_filter == $user->state) {
+                array_push($filterd_users, $user);
+            }
+        }
+        return $filterd_users;
+    }
+
+    public function getUsersData(Request $request)
     {
         $all_data = array();
-        $country = new Country();
         $users = Customer::all();
-        $rules = $country->validRegx();
-        $country_codes = CountryCode::all();
-        
+        $rules = $this->country->validRegx();
+        $filterd_users = array();
         foreach($users as $user) 
         {
             foreach($rules as $rule) 
             {
-                $value = preg_match_all($rule['phone'], $user->phone, $matches, PREG_OFFSET_CAPTURE);
+                if($request['country'] && $request['country'] != $rule['title']){
+                    continue;
+                }
+                $value = preg_match($rule['phone'], $user->phone);
                 if (!$value) {
+
                     $country_code = substr($user->phone, 1,3);
-                    if($country_code == $country->getCountryCode($rule['phone']))
+                    if($country_code == $this->country->getCountryCode($rule['phone']))
                     {
-                       $user = $this->determineState($user ,$rule['phone'], "NOK");
+                       $user = $this->setCountryDetails($user ,$rule, "NOK");
+                       array_push($filterd_users, $user);
                     }
                     continue;
                 }else {
-                    $user = $this->determineState($user ,$rule['phone'], "OK");
+                    $user = $this->setCountryDetails($user ,$rule, "OK");
+                    array_push($filterd_users, $user);
                 }
             }
         }
-
-        $all_data['users'] = $users;
-        $all_data['country_codes'] = $country_codes;
+        if($request['state']) {
+            $filterd_users = $this->filterByState($filterd_users, $request['state']);
+        }
+        $all_data['users'] = $filterd_users;
         return response()->json($all_data);
     }
 
-
-    public function getFilteredCountries($country_filter)
+    public function getCountryCodes()
     {
-        $users = Customer::all();
-        $country = new Country();
-        $rules = $country->validRegx();
-        $filterd_users = array();
-        $country_codes = CountryCode::all();
-        if ($country_filter) {
-            foreach($users as $user) 
-            {
-                foreach($rules as $rule)
-                {
-                    if($rule['title'] == $country_filter) 
-                    {
-                        $value = preg_match_all($rule['phone'], $user->phone, $matches , PREG_OFFSET_CAPTURE);
-                        if (!$value) {
-                            $country_code = substr($user->phone, 1,3);
-                            if($country_code == $country->getCountryCode($rule['phone']))
-                            {
-                                $user = $this->determineState($user ,$rule['phone'], "NOK");
-                                array_push($filterd_users, $user);
-                            }
-                            continue;
-                        } else {
-                            $user = $this->determineState($user ,$rule['phone'], "NOK");
-                            if ( $user->country_name == $country_filter )
-                                array_push($filterd_users, $user);
-                        }
-                    }
-                }
-            }
-            $all_data['users'] = $filterd_users;
-            $all_data['country_codes'] = $country_codes;
-            return response()->json($all_data);
-        }
-    }
-
-
-    public function getSateFilter($state_filter)
-    {
-        $users = Customer::all();
-        $country = new Country();
-        $rules = $country->validRegx();
-        $filterd_users = array();
-        $country_codes = CountryCode::all();
-        if ( $state_filter) {
-            foreach($users as $user) 
-            {
-                foreach($rules as $rule)
-                {
-                    if($state_filter == "OK") {
-                        $value = preg_match_all($rule['phone'], $user->phone, $matches , PREG_OFFSET_CAPTURE);
-                        if (!$value) {
-                            continue;
-                        } else {
-                            $user = $this->determineState($user ,$rule['phone'], "NOK");
-
-                            array_push($filterd_users, $user);
-                        }
-                    } else if ($state_filter == "NOK") {
-                        $value = preg_match_all($rule['phone'], $user->phone, $matches , PREG_OFFSET_CAPTURE);
-                        if (!$value) {
-                            $country_code = substr($user->phone, 1,3);
-                            if($country_code == $country->getCountryCode($rule['phone']))
-                            {
-                                $user = $this->determineState($user ,$rule['phone'], "NOK");
-
-                                array_push($filterd_users, $user);
-                            }
-                            continue;
-                        }
-                    }
-                }
-            }
-            $all_data['users'] = $filterd_users;
-            $all_data['country_codes'] = $country_codes;
-            return response()->json($all_data);
-        }
-    }
-    public function getStateCountryFilter($country_filter,$state_filter)
-    {
-        $users = Customer::all();
-        $country = new Country();
-        $rules = $country->validRegx();
-        $filterd_users = array();
-        $country_codes = CountryCode::all();
-        if ($country_filter || $state_filter) {
-            foreach($users as $user) 
-            {
-                foreach($rules as $rule)
-                {
-                    if($rule['title'] == $country_filter && $state_filter == "OK") {
-                        $value = preg_match_all($rule['phone'], $user->phone, $matches , PREG_OFFSET_CAPTURE);
-                        if (!$value) {
-                            continue;
-                        } else {
-                            $user = $this->determineState($user ,$rule['phone'], "NOK");
-                            if ( $user->country_name == $country_filter )
-                                array_push($filterd_users, $user);
-                        }
-                    }else if ($rule['title'] == $country_filter && $state_filter == "NOK" ) {
-                        $value = preg_match_all($rule['phone'], $user->phone, $matches , PREG_OFFSET_CAPTURE);
-                        if (!$value) {
-                            $cc = substr($user->phone, 1,3);
-                            if($cc == $country->getCountryCode($rule['phone']))
-                            {
-                                $user = $this->determineState($user ,$rule['phone'], "NOK");
-                                array_push($filterd_users, $user);
-                            }
-                            continue;
-                        }
-                    }
-                }
-            }
-            $all_data['users'] = $filterd_users;
-            $all_data['country_codes'] = $country_codes;
-            return response()->json($all_data);
-        }
+        return response()->json(CountryCode::all());
     }
 }
